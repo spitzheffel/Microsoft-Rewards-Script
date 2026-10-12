@@ -13,9 +13,15 @@ const serverChanQueue = new PQueue({
 export async function sendServerChan(config: WebhookServerChanConfig, content: string): Promise<void> {
     if (!config?.sendKey) return
 
+    // 与官方 serverchan-sdk 一致：Server酱³ 的 sctp{uid}t... 走 {uid}.push.ft07.com，Turbo 版 SCT... 走 sctapi.ftqq.com
+    const sc3Uid = /^sctp(\d+)t/.exec(config.sendKey)?.[1]
+    const url = sc3Uid
+        ? `https://${sc3Uid}.push.ft07.com/send/${config.sendKey}.send`
+        : `https://sctapi.ftqq.com/${config.sendKey}.send`
+
     const request: HttpRequestConfig = {
         method: 'POST',
-        url: `https://sctapi.ft07.com/${config.sendKey}.send`,
+        url,
         headers: { 'Content-Type': 'application/json' },
         data: {
             title: config.title ?? 'Microsoft-Rewards-Script',
